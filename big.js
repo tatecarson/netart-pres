@@ -202,8 +202,8 @@ addEventListener("load", () => {
     if (m) m(big.current);
   }
 
-  const elem = document.documentElement;
   function openFullscreen() {
+    const elem = document.documentElement;
     if (elem.requestFullscreen) {
       elem.requestFullscreen();
     } else if (elem.webkitRequestFullscreen) {
@@ -215,17 +215,6 @@ addEventListener("load", () => {
     }
   }
 
-  // function closeFullscreen() {
-  //   if (document.exitFullscreen) {
-  //     document.exitFullscreen();
-  //   } else if (document.webkitExitFullscreen) {
-  //     /* Safari */
-  //     document.webkitExitFullscreen();
-  //   } else if (document.msExitFullscreen) {
-  //     /* IE11 */
-  //     document.msExitFullscreen();
-  //   }
-  // }
   function onResize() {
     if (big.mode !== "talk") return;
     let { clientWidth: width, clientHeight: height } = document.documentElement;
