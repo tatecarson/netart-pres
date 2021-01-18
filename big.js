@@ -1,4 +1,5 @@
-let ASPECT_RATIO = window.BIG_ASPECT_RATIO === undefined ? 1.6 : window.BIG_ASPECT_RATIO;
+let ASPECT_RATIO =
+  window.BIG_ASPECT_RATIO === undefined ? 1.6 : window.BIG_ASPECT_RATIO;
 
 function parseHash() {
   return parseInt(window.location.hash.substring(1), 10);
@@ -21,18 +22,18 @@ addEventListener("load", () => {
     let sc = pc.appendChild(ce("div", "slide-container"));
     sc.appendChild(slide);
     return Object.assign(sc, {
-      _notes: Array.from(slide.querySelectorAll("notes"), noteElement => {
+      _notes: Array.from(slide.querySelectorAll("notes"), (noteElement) => {
         noteElement.parentNode.removeChild(noteElement);
         return noteElement.innerHTML.trim();
       }),
-      _i
+      _i,
     });
   });
   let timeoutInterval,
     { body } = document,
     {
       className: initialBodyClass,
-      style: { cssText: initialBodyStyle }
+      style: { cssText: initialBodyStyle },
     } = body,
     big = (window.big = {
       current: -1,
@@ -40,7 +41,7 @@ addEventListener("load", () => {
       length: slideDivs.length,
       forward,
       reverse,
-      go
+      go,
     });
 
   function forward() {
@@ -59,14 +60,28 @@ addEventListener("load", () => {
       slideDiv = sc.firstChild;
     if (sc._notes.length) {
       console.group(n);
-      for (let note of sc._notes) console.log("%c%s", "padding:5px;font-family:serif;font-size:18px;line-height:150%;", note);
+      for (let note of sc._notes)
+        console.log(
+          "%c%s",
+          "padding:5px;font-family:serif;font-size:18px;line-height:150%;",
+          note
+        );
       console.groupEnd();
     }
-    for (let slide of slideDivs) slide.style.display = slide._i === n ? "" : "none";
-    body.className = `talk-mode ${slideDiv.dataset.bodyClass || ""} ${initialBodyClass}`;
-    body.style.cssText = `${initialBodyStyle} ${slideDiv.dataset.bodyStyle || ""}`;
+    for (let slide of slideDivs)
+      slide.style.display = slide._i === n ? "" : "none";
+    body.className = `talk-mode ${
+      slideDiv.dataset.bodyClass || ""
+    } ${initialBodyClass}`;
+    body.style.cssText = `${initialBodyStyle} ${
+      slideDiv.dataset.bodyStyle || ""
+    }`;
     window.clearInterval(timeoutInterval);
-    if (slideDiv.dataset.timeToNext) timeoutInterval = window.setTimeout(forward, parseFloat(slideDiv.dataset.timeToNext) * 1000);
+    if (slideDiv.dataset.timeToNext)
+      timeoutInterval = window.setTimeout(
+        forward,
+        parseFloat(slideDiv.dataset.timeToNext) * 1000
+      );
     onResize();
     if (window.location.hash !== n) window.location.hash = n;
     document.title = slideDiv.textContent;
@@ -79,14 +94,19 @@ addEventListener("load", () => {
     sc.style.width = `${width}px`;
     sc.style.height = `${height}px`;
     slideDiv.style.padding = `${padding}px`;
-    if (getComputedStyle(slideDiv).display === "grid") slideDiv.style.height = `${height - padding * 2}px`;
+    if (getComputedStyle(slideDiv).display === "grid")
+      slideDiv.style.height = `${height - padding * 2}px`;
     for (let step of [100, 50, 10, 2]) {
       for (; fontSize > 0; fontSize -= step) {
         slideDiv.style.fontSize = `${fontSize}px`;
         if (
           slideDiv.scrollWidth <= width &&
           slideDiv.offsetHeight <= height &&
-          Array.from(slideDiv.querySelectorAll("div")).every(elem => elem.scrollWidth <= elem.clientWidth && elem.scrollHeight <= elem.clientHeight)
+          Array.from(slideDiv.querySelectorAll("div")).every(
+            (elem) =>
+              elem.scrollWidth <= elem.clientWidth &&
+              elem.scrollHeight <= elem.clientHeight
+          )
         ) {
           break;
         }
@@ -102,7 +122,9 @@ addEventListener("load", () => {
     emptyNode(pc);
     for (let sc of slideDivs) {
       let subContainer = pc.appendChild(ce("div", "sub-container")),
-        sbc = subContainer.appendChild(ce("div", sc.firstChild.dataset.bodyClass || ""));
+        sbc = subContainer.appendChild(
+          ce("div", sc.firstChild.dataset.bodyClass || "")
+        );
       sbc.appendChild(sc);
       sbc.style.cssText = sc.dataset.bodyStyle || "";
       sc.style.display = "flex";
@@ -132,16 +154,18 @@ addEventListener("load", () => {
     body.className = "jump-mode " + initialBodyClass;
     body.style.cssText = initialBodyStyle;
     emptyNode(pc);
-    slideDivs.forEach(sc => {
+    slideDivs.forEach((sc) => {
       let subContainer = pc.appendChild(ce("div", "sub-container"));
-      subContainer.addEventListener("keypress", e => {
+      subContainer.addEventListener("keypress", (e) => {
         if (e.key !== "Enter") return;
         subContainer.removeEventListener("click", onClickSlide);
         e.stopPropagation();
         e.preventDefault();
         onTalk(sc._i);
       });
-      let sbc = subContainer.appendChild(ce("div", sc.firstChild.dataset.bodyClass || ""));
+      let sbc = subContainer.appendChild(
+        ce("div", sc.firstChild.dataset.bodyClass || "")
+      );
       sbc.appendChild(sc);
       sc.style.display = "flex";
       sbc.style.cssText = sc.dataset.bodyStyle || "";
@@ -174,15 +198,40 @@ addEventListener("load", () => {
           return forward();
       }
     }
-    let m = { p: onPrint, t: onTalk, j: onJump }[e.key];
+    let m = { p: onPrint, t: onTalk, j: onJump, f: openFullscreen }[e.key];
     if (m) m(big.current);
   }
 
+  const elem = document.documentElement;
+  function openFullscreen() {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      /* Safari */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      /* IE11 */
+      elem.msRequestFullscreen();
+    }
+  }
+
+  // function closeFullscreen() {
+  //   if (document.exitFullscreen) {
+  //     document.exitFullscreen();
+  //   } else if (document.webkitExitFullscreen) {
+  //     /* Safari */
+  //     document.webkitExitFullscreen();
+  //   } else if (document.msExitFullscreen) {
+  //     /* IE11 */
+  //     document.msExitFullscreen();
+  //   }
+  // }
   function onResize() {
     if (big.mode !== "talk") return;
     let { clientWidth: width, clientHeight: height } = document.documentElement;
     if (ASPECT_RATIO !== false) {
-      if (width / height > ASPECT_RATIO) width = Math.ceil(height * ASPECT_RATIO);
+      if (width / height > ASPECT_RATIO)
+        width = Math.ceil(height * ASPECT_RATIO);
       else height = Math.ceil(width / ASPECT_RATIO);
     }
     resizeTo(slideDivs[big.current], width, height);
@@ -191,12 +240,12 @@ addEventListener("load", () => {
   window.matchMedia("print").addListener(onPrint);
   document.addEventListener("click", onClick);
   document.addEventListener("keydown", onKeyDown);
-  document.addEventListener("touchstart", e => {
+  document.addEventListener("touchstart", (e) => {
     if (big.mode !== "talk") return;
     let { pageX: startingPageX } = e.changedTouches[0];
     document.addEventListener(
       "touchend",
-      e2 => {
+      (e2) => {
         let distanceTraveled = e2.changedTouches[0].pageX - startingPageX;
         // Don't navigate if the person didn't swipe by fewer than 4 pixels
         if (Math.abs(distanceTraveled) < 4) return;
@@ -210,7 +259,10 @@ addEventListener("load", () => {
     if (big.mode === "talk") go(parseHash());
   });
   addEventListener("resize", onResize);
-  console.log("This is a big presentation. You can: \n\n* press j to jump to a slide\n" + "* press p to see the print view\n* press t to go back to the talk view");
+  console.log(
+    "This is a big presentation. You can: \n\n* press j to jump to a slide\n" +
+      "* press p to see the print view\n* press t to go back to the talk view"
+  );
   body.className = `talk-mode ${initialBodyClass}`;
   go(parseHash() || big.current);
 });
